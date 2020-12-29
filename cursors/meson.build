@@ -337,7 +337,13 @@ links += [[
 
 foreach link_entry : links
     src = link_entry[0]
+    if is_win32
+	src = src + '.cur'
+    endif
     foreach dest : link_entry[1]
+	if is_win32
+	    dest = dest + '.cur'
+	endif
         meson.add_install_script(
             symlink,
             '--src', join_paths (cursor_dir, src),
