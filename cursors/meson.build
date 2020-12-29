@@ -1,6 +1,18 @@
 cursor_dir = join_paths(icon_dir, 'cursors')
 rsvg = find_program('rsvg-convert')
-xcursorgen = find_program('xcursorgen')
+
+if build_machine.system() == 'windows'
+    is_win32 = true
+else
+    is_win32 = false
+endif
+
+if not is_win32
+    xcursorgen = find_program('xcursorgen')
+else
+    python2 = find_program('python2')
+    anicursorgen = join_paths(meson.current_source_dir(), 'anicursorgen.py')
+endif
 
 cursors = [
     'all-scroll',
@@ -118,15 +130,34 @@ cursors += [
 foreach cursor : cursors
     message('generating: ' + cursor)
 
-    run_command(
-        xcursorgen,
-        cursor + '.in',
-        '-p', join_paths (meson.build_root(), 'cursors'),
-        join_paths (meson.build_root(), 'cursors', cursor)
-    )
+    if not is_win32
+	cursor_dest = cursor
+	run_command(
+	    xcursorgen,
+	    cursor + '.in',
+	    '-p', join_paths (meson.build_root(), 'cursors'),
+	    join_paths (meson.build_root(), 'cursors', cursor_dest)
+	)
+    else
+	if cursor.contains('watch')
+	    cursor_dest = cursor + '.ani'
+	else
+	    cursor_dest = cursor + '.cur'
+	endif
+
+	run_command(
+	    python2,
+	    anicursorgen,
+	    '-p', join_paths (meson.build_root(), 'cursors'),
+	    cursor + '.in',
+	    join_paths (meson.build_root(), 'cursors', cursor_dest),
+	    check: true
+	)
+    endif
+
 
     install_data(
-        join_paths (meson.build_root(), 'cursors', cursor),
+        join_paths (meson.build_root(), 'cursors', cursor_dest),
         install_dir: cursor_dir
     )
 endforeach
