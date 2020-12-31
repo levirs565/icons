@@ -10,7 +10,7 @@ endif
 if not is_win32
     xcursorgen = find_program('xcursorgen')
 else
-    python2 = find_program('python2')
+    python = find_program('python')
     anicursorgen = join_paths(meson.current_source_dir(), 'anicursorgen.py')
 endif
 
@@ -146,7 +146,7 @@ foreach cursor : cursors
 	endif
 
 	run_command(
-	    python2,
+	    python,
 	    anicursorgen,
 	    '-p', join_paths (meson.build_root(), 'cursors'),
 	    cursor + '.in',

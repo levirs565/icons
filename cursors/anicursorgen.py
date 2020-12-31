@@ -1,7 +1,8 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # anicursorgen
 # Copyright (C) 2015 Руслан Ижбулатов <lrn1986@gmail.com>
+# Modified by Levi Rizki Saputra <levirs565@gmail.com> for Python 3 compatibility
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-from __future__ import print_function
+#from __future__ import print_function
 
 import sys
 import os
@@ -25,6 +26,7 @@ import shlex
 import io
 import struct
 import math
+from functools import cmp_to_key
 from PIL import Image
 from PIL import ImageFilter
 
@@ -141,7 +143,7 @@ def make_cur (frames, args, animated=False):
     else:
       return 0
 
-  frames = sorted (frames, frame_size_cmp, reverse=True)
+  frames = sorted (frames, key=cmp_to_key(frame_size_cmp), reverse=True)
 
   for frame in frames:
     width = frame[0]
@@ -235,7 +237,7 @@ def make_framesets (frames):
     else:
       return 0
 
-  framesets = sorted (framesets, frameset_size_cmp, reverse=True)
+  framesets = sorted (framesets, key=cmp_to_key(frameset_size_cmp), reverse=True)
 
   return framesets
 
@@ -283,7 +285,7 @@ def make_ani (frames, out, args):
     copy_to (buf, cur)
     pos = buf.seek (0, io.SEEK_END)
     if pos % 2 != 0:
-      buf.write ('\x00' * (2 - (pos % 2)))
+      buf.write (('\x00' * (2 - (pos % 2))).encode())
 
   end_at = buf.seek (0, io.SEEK_CUR)
   buf.seek (riff_len_pos, io.SEEK_SET)
@@ -318,7 +320,7 @@ def write_cur (out, frame, frame_png):
       acc_pos += 1
       if acc_pos == 8:
         acc_pos = 0
-        out.write (chr (acc))
+        out.write (chr (acc).encode())
         wrote += 1
     if wrote % 4 != 0:
       out.write (b'\x00' * (4 - wrote % 4))
@@ -327,6 +329,7 @@ def parse_config_from (inp, prefix):
   frames = []
 
   for line in inp.readlines ():
+    line = line.decode()
     words = shlex.split (line.rstrip ('\n').rstrip ('\r'))
 
     if len (words) < 4:
